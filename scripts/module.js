@@ -93,7 +93,7 @@ Hooks.on("init", () => {
   console.log("------ PATCHING HIT DICE RECOVERY -------");
   patch__getRestHitDiceRecovery();
 
-  console.log("------ PATCHING STYX ITEMS & SPELLS RECOVERY -------");
+  console.log("------ PATCHING SHORTIES ITEMS & SPELLS RECOVERY -------");
   patch__rest();
 
   console.log("------ REGISTERING MAGIC TABLES SETTINGS -------");
@@ -291,16 +291,16 @@ function patch__getRestHitDiceRecovery() {
   );
 }
 
-// Styx: Class abilities, item charges, and spell slots do NOT on recover on a long rest, but on a short rest instead.
+// Styx & Gale: Class abilities, item charges, and spell slots do NOT on recover on a long rest, but on a short rest instead.
 async function patch__rest() {
   libWrapper.register(
     MODULE_ID, // the package's "id" or your world's manifest "id"
     "CONFIG.Actor.documentClass.prototype._rest",
     async function _rest(config, result = {}, ...args) {
-      // Check for Styx
-      // const styx = this.id == "38IE366gMr7tIPFr"; // Testing id
-      const styx = this.id == "ZUeXvvGAeVoqaA6e"; // Real id
-      if (styx) console.log(`------ MODIFYING STYX RECOVERY -------`);
+      // Check for Styx & Gale
+      // const shorties = this.id == "38IE366gMr7tIPFr"; // Testing ids
+      const shorties = this.id == "ZUeXvvGAeVoqaA6e" || this.id == "WUFChJU9XPoTOzhB"; // Real ids Styx & Gale
+      if (shorties) console.log(`------ MODIFYING STYX RECOVERY -------`);
 
       if (args.length) {
         foundry.utils.logCompatibilityWarning(
@@ -340,15 +340,15 @@ async function patch__rest() {
           ...hpActorUpdates,
           ...this._getRestResourceRecovery({
             recoverShortRestResources: !longRest,
-            recoverLongRestResources: (longRest && !styx) || (!longRest && styx),
+            recoverLongRestResources: (longRest && !shorties) || (!longRest && shorties),
           }),
-          ...this._getRestSpellRecovery({ recoverLong: (longRest && !styx) || (!longRest && styx) }),
+          ...this._getRestSpellRecovery({ recoverLong: (longRest && !shorties) || (!longRest && shorties) }),
         },
         updateItems: [
           ...(hdItemUpdates ?? []),
           ...(await this._getRestItemUsesRecovery({
-            recoverShortRestUses: (!longRest && !styx) || (longRest && !styx) || (!longRest && styx),
-            recoverLongRestUses: (longRest && !styx) || (!longRest && styx),
+            recoverShortRestUses: (!longRest && !shorties) || (longRest && !shorties) || (!longRest && shorties),
+            recoverLongRestUses: (longRest && !shorties) || (!longRest && shorties),
             recoverDailyUses: newDay,
             rolls,
           })),
