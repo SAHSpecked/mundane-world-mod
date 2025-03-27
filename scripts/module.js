@@ -4,7 +4,7 @@ const ACTORS = [
   // A "Hands On" Adventure
   {
     name: "C.O.I.L.",
-    id: "Awq8gebf8aik294w",
+    id: "kRQIPcn2PX01FDHq",
     srExhaustionRecovery: false,
     hitDiceRecoveryClasses: ["Artificer"],
   },
@@ -46,9 +46,9 @@ const ACTORS = [
   },
   {
     name: "Valdimira",
-    id: "XYtRAXLsNF8ViFi4",
+    id: "Y8Md2xRnUXD4XIYW",
     srExhaustionRecovery: false,
-    hitDiceRecoveryClasses: ["Warlock"],
+    hitDiceRecoveryClasses: ["Warlock", "Rogue"],
   },
 
   // The Fellowship of the Arcane
@@ -297,10 +297,9 @@ async function patch__rest() {
     MODULE_ID, // the package's "id" or your world's manifest "id"
     "CONFIG.Actor.documentClass.prototype._rest",
     async function _rest(config, result = {}, ...args) {
-      // Check for Styx & Gale
-      // const shorties = this.id == "38IE366gMr7tIPFr"; // Testing ids
+      // Check for shorties (those who get back long rest resources on short rests instead)
       const shorties = this.id == "ZUeXvvGAeVoqaA6e" || this.id == "WUFChJU9XPoTOzhB"; // Real ids Styx & Gale
-      if (shorties) console.log(`------ MODIFYING STYX RECOVERY -------`);
+      if (shorties) console.log(`------ MODIFYING SHORTIES RECOVERY -------`);
 
       if (args.length) {
         foundry.utils.logCompatibilityWarning(

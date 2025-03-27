@@ -7,9 +7,9 @@
       "name": "SAHSpecked"
     }
   ],
-  "version": "0.0.2",
+  "version": "0.0.3",
   "compatibility": {
-    "minimum": "11",
+    "minimum": "12",
     "verified": "12"
   },
   "esmodules": ["scripts/module.js"],
