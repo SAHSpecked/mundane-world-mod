@@ -46,9 +46,9 @@ const ACTORS = [
   },
   {
     name: "Valdimira",
-    id: "Y8Md2xRnUXD4XIYW",
+    id: "yXxF6xlp0V5tucz6",
     srExhaustionRecovery: false,
-    hitDiceRecoveryClasses: ["Warlock", "Rogue"],
+    hitDiceRecoveryClasses: ["Bard", "Rogue"],
   },
 
   // The Fellowship of the Arcane
