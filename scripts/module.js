@@ -1,104 +1,129 @@
 const MODULE_ID = "mundane-world-mod";
 
 const ACTORS = [
+  // Testing
+  {
+    name: "Test",
+    id: "aO3bWpI9kFf7WtO7",
+    hitDiceRecoveryClasses: ["Warlock"],
+    srExhaustionRecovery: true,
+  },
+
   // A "Hands On" Adventure
   {
-    name: "C.O.I.L.",
-    id: "kRQIPcn2PX01FDHq",
+    name: "Berry",
+    id: "Lq7FVtvMN5Wq4ITZ",
+    hitDiceRecoveryClasses: ["Druid"],
     srExhaustionRecovery: false,
-    hitDiceRecoveryClasses: ["Artificer"],
   },
   {
     name: "Delta",
-    id: "Dz4zLKytvQvxXwvO",
-    srExhaustionRecovery: false,
+    id: "",
     hitDiceRecoveryClasses: ["Wizard"],
+    srExhaustionRecovery: false,
+  },
+  {
+    name: "Felix",
+    id: "NUN20Mh4p1QxKcws",
+    hitDiceRecoveryClasses: ["Artificer"],
+    srExhaustionRecovery: false,
+  },
+  {
+    name: "Forcus",
+    id: "dJLuKdNJ8mGkxSeh",
+    hitDiceRecoveryClasses: ["Warlock"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Gale",
-    id: "WUFChJU9XPoTOzhB",
-    srExhaustionRecovery: false,
+    id: "HbKS0mbIr1sCTaUy",
     hitDiceRecoveryClasses: ["Rogue"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Misha",
-    id: "HILjdLTI0snDyo8B",
-    srExhaustionRecovery: false,
+    id: "1haYgIQBNwRZ1IlQ",
     hitDiceRecoveryClasses: ["Warlock"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Ren",
-    id: "uKSgASrglRkKDTAy",
-    srExhaustionRecovery: true,
+    id: "",
     hitDiceRecoveryClasses: ["Warlord", "Ranger"],
+    srExhaustionRecovery: true,
   },
   {
     name: "Tom",
-    id: "KJo2Swuf9N3E6Oh5",
-    srExhaustionRecovery: false,
+    id: "",
     hitDiceRecoveryClasses: ["Vessel"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Trinity",
-    id: "iRckJ4akgbC7u3jd",
-    srExhaustionRecovery: false,
+    id: "",
     hitDiceRecoveryClasses: ["Paladin"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Valdimira",
-    id: "yXxF6xlp0V5tucz6",
-    srExhaustionRecovery: false,
+    id: "18XwFY4oOoApeiu8",
     hitDiceRecoveryClasses: ["Bard", "Rogue"],
+    srExhaustionRecovery: false,
   },
 
   // The Fellowship of the Arcane
   {
     name: "Doc Squibly",
     id: "TQdwxIuICLlIzKhC",
-    srExhaustionRecovery: false,
     hitDiceRecoveryClasses: ["Bard"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Kanzou",
     id: "zg3nljrQluUQbS5m",
-    srExhaustionRecovery: false,
     hitDiceRecoveryClasses: ["Barbarian", "Rogue"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Styx",
     id: "ZUeXvvGAeVoqaA6e",
-    srExhaustionRecovery: false,
     hitDiceRecoveryClasses: ["Cleric"],
+    srExhaustionRecovery: false,
   },
   {
     name: "West",
     id: "fMuwwbHhWz78bacH",
-    srExhaustionRecovery: false,
     hitDiceRecoveryClasses: ["Artificer"],
+    srExhaustionRecovery: false,
   },
   {
     name: "Whistle",
     id: "LGAA3DcTvsZuKx8H",
-    srExhaustionRecovery: false,
     hitDiceRecoveryClasses: ["Monk"],
+    srExhaustionRecovery: false,
   },
 ];
 
 // Patch hit dice recovery and register settings for Magic Tables
 // First argument for registering settings is the module's "id" or just "core" for unmanaged settings
 Hooks.on("init", () => {
-  console.log("------ CHANGING MAX LEVEL TO 50 -------");
-  CONFIG.DND5E.maxLevel = 50;
+  console.log("------ CHANGING MAX LEVEL TO 120 -------");
+  CONFIG.DND5E.maxLevel = 120;
+
+  console.log("------ PATCHING SHORT REST EXHAUSTION RECOVERY -------");
+  patch__rest();
 
   console.log("------ PATCHING HIT DICE RECOVERY -------");
   patch__getRestHitDiceRecovery();
 
-  console.log("------ PATCHING SHORTIES ITEMS & SPELLS RECOVERY -------");
-  patch__rest();
+  console.log("------ PATCHING RESOURCE, SPELL, ITEM RECOVERY -------");
+  patch__getRestResourceRecovery();
+  patch__getRestSpellRecovery();
+  patch__getRestItemUsesRecovery();
 
-  console.log("------ REGISTERING MAGIC TABLES SETTINGS -------");
+  console.log("------ REGISTERING MODULE SETTINGS -------");
 
-  // AHOA
+  // AHOA Settings
   game.settings.register(MODULE_ID, "enableMagicTablesAHOA", {
     name: "Enable Magic Tables (AHOA)",
     hint: "Any actor not on the exception list, who casts a spell, will automatically roll the Magic Tables",
@@ -138,7 +163,7 @@ Hooks.on("init", () => {
     },
   });
 
-  // TFA
+  // TFA Settings
   game.settings.register(MODULE_ID, "enableMagicTablesTFA", {
     name: "Enable Magic Tables (TFA)",
     hint: "Any actor not on the exception list, who casts a spell, will automatically roll the Magic Tables",
@@ -177,34 +202,26 @@ Hooks.on("init", () => {
       console.log("Magic Tables Exceptions (TFA): " + value);
     },
   });
+
+  // Other Settings
+  game.settings.register(MODULE_ID, "shorties", {
+    name: "Shorties",
+    hint: "Space-separated actor ids who uniquely recover long rest resources on short rests instead",
+    scope: "world", // "world" = sync to db, "client" = local storage
+    config: true,
+    type: String,
+    default: "",
+    onChange: (value) => {
+      // value is the new value of the setting
+      console.log("Shorties: " + value);
+    },
+  });
 });
 
 // Expands the list of dnd5e hit die types
 Hooks.on("setup", () => {
   console.log("------ EXPANDING HIT DIE TYPES -------");
-  CONFIG.DND5E.hitDieTypes = ["d4", "d6", "d8", "d10", "d12", "d20"];
-});
-
-// Exhaustion automation
-Hooks.on("dnd5e.restCompleted", async (actor, result) => {
-  const exhaust = actor.system.attributes.exhaustion - 1;
-  if (exhaust >= 0) {
-    if (result.longRest) {
-      await actor.update({ "system.attributes.exhaustion": exhaust });
-      await ChatMessage.create({
-        content: `${actor.name} recovers a level of exhaustion: <b>${exhaust + 1} -> ${exhaust}</b>`,
-      });
-    } else {
-      // Some actors may have short rest exhaustion recovery
-      const findActorSr = ACTORS.find((obj) => obj.id == actor.id && obj.srExhaustionRecovery == true);
-      if (findActorSr != undefined) {
-        await actor.update({ "system.attributes.exhaustion": exhaust });
-        await ChatMessage.create({
-          content: `${actor.name} recovers a level of exhaustion: <b>${exhaust + 1} -> ${exhaust}</b>`,
-        });
-      }
-    }
-  }
+  CONFIG.DND5E.hitDieTypes = ["d2", "d4", "d6", "d8", "d10", "d12", "d20"];
 });
 
 // Magic tables automation
@@ -235,127 +252,66 @@ Hooks.on("dnd5e.useItem", async (item, config, options) => {
   }
 });
 
-// Patch functions
-function patch__getRestHitDiceRecovery() {
-  libWrapper.register(
-    MODULE_ID, // the package's "id" or your world's manifest "id"
-    "CONFIG.Actor.documentClass.prototype._getRestHitDiceRecovery",
-    function ({ maxHitDice } = {}) {
-      // Set maxHitDice to 0 and calculate every time
-      maxHitDice = 0;
-
-      // Grab classes as values
-      let filteredClasses = Object.values(this.classes);
-
-      // Modify available classes for the special actors and set their maxHitDice differently
-      const findActor = ACTORS.find((obj) => obj.id == this.id);
-      if (findActor != undefined) {
-        console.log(`------ MODIFYING HIT DIE RECOVERY (${this.name}) -------`);
-
-        // Filter out to only recovery classes
-        filteredClasses = filteredClasses.filter((cla) => findActor.hitDiceRecoveryClasses.includes(cla.name));
-
-        // Determine the number of hit dice which may be recovered by the base classes
-        for (const cla of filteredClasses) {
-          maxHitDice += cla.system.levels;
-        }
-        maxHitDice = Math.max(Math.floor(maxHitDice / 2), 1);
-      } else {
-        // Determine the number of hit dice which may be recovered for not special actors
-        maxHitDice = Math.max(Math.floor(this.system.details.level / 2), 1);
-      }
-
-      // Sort classes in-place, assuming players prefer recovering larger hit dice first
-      filteredClasses.sort((a, b) => {
-        return (parseInt(b.system.hitDice.slice(1)) || 0) - (parseInt(a.system.hitDice.slice(1)) || 0);
-      });
-
-      // Update hit dice usage for classes
-      let updates = [];
-      let hitDiceRecovered = 0;
-      for (const cla of filteredClasses) {
-        const hitDiceUsed = cla.system.hitDiceUsed;
-        if (hitDiceRecovered < maxHitDice && hitDiceUsed > 0) {
-          const delta = Math.min(hitDiceUsed || 0, maxHitDice - hitDiceRecovered);
-          hitDiceRecovered += delta;
-          updates.push({
-            _id: cla.id,
-            "system.hitDiceUsed": hitDiceUsed - delta,
-          });
-        }
-      }
-
-      return { updates, hitDiceRecovered };
-    },
-    "OVERRIDE",
-  );
-}
-
-// Styx & Gale: Class abilities, item charges, and spell slots do NOT on recover on a long rest, but on a short rest instead.
 async function patch__rest() {
   libWrapper.register(
     MODULE_ID, // the package's "id" or your world's manifest "id"
     "CONFIG.Actor.documentClass.prototype._rest",
-    async function _rest(config, result = {}, ...args) {
-      // Check for shorties (those who get back long rest resources on short rests instead)
-      const shorties = this.id == "ZUeXvvGAeVoqaA6e" || this.id == "WUFChJU9XPoTOzhB"; // Real ids Styx & Gale
-      if (shorties) console.log(`------ MODIFYING SHORTIES RECOVERY -------`);
-
-      if (args.length) {
-        foundry.utils.logCompatibilityWarning(
-          "Actor5e._rest now takes a config object and a results object as parameters.",
-          { since: "DnD5e 3.1", until: "DnD5e 3.3" },
-        );
-        const [longRest, dhd, dhp] = args;
-        config = { chat: config, newDay: result };
-        config.type = longRest ? "long" : "short";
-        result = { dhd, dhp };
-      }
+    async function (config, result = {}) {
+      const shorties = game.settings.get(MODULE_ID, "shorties").split(/\s+/);
+      const shorty = shorties.includes(this.id);
+      if (shorty) console.log(`------ MODIFYING SHORTY RECOVERY (${this.name}) -------`);
 
       if (foundry.utils.getType(this.system.rest) === "function" && (await this.system.rest(config, result)) === false)
         return;
 
-      let hitPointsRecovered = 0;
-      let hpActorUpdates = {};
-      let hitDiceRecovered = 0;
-      let hdActorUpdates = {};
-      let hdItemUpdates = [];
-      const rolls = [];
-      const longRest = config.type === "long";
-      const newDay = config.newDay === true;
+      result = foundry.utils.mergeObject(
+        {
+          type: config.type,
+          deleteItems: [],
+          deltas: {
+            hitPoints: 0,
+            hitDice: 0,
+          },
+          newDay: config.newDay === true,
+          request: config.request,
+          rolls: [],
+          updateData: {},
+          updateItems: [],
+        },
+        result,
+      );
+      result.clone ??= this.clone();
+      if ("dhp" in result) result.deltas.hitPoints = result.dhp;
+      if ("dhd" in result) result.deltas.hitDice = result.dhd;
 
-      // Recover hit points & hit dice on long rest
-      if (longRest) {
-        ({ updates: hpActorUpdates, hitPointsRecovered } = this._getRestHitPointRecovery());
-        ({ updates: hdItemUpdates, actorUpdates: hdActorUpdates, hitDiceRecovered } = this._getRestHitDiceRecovery());
+      this._getRestHitDiceRecovery(config, result);
+      this._getRestHitPointRecovery(config, result);
+      this._getRestResourceRecovery(config, result);
+      this._getRestSpellRecovery(config, result);
+      await this._getRestItemUsesRecovery(config, result);
+
+      result.dhp = result.deltas.hitPoints;
+      result.dhd = result.deltas.hitDice;
+      result.longRest = result.type === "long";
+
+      // Patch for short rest exhaustion recovery
+      if (result.type === "short") {
+        const findActorSr = ACTORS.find((obj) => obj.id == this.id && obj.srExhaustionRecovery == true);
+        if (findActorSr != undefined) {
+          console.log(`------ SHORT REST EXHAUSTION (${this.name}) -------`);
+          config.exhaustionDelta = -1;
+        }
       }
 
-      // Figure out the rest of the changes
-      foundry.utils.mergeObject(result, {
-        dhd: (result.dhd ?? 0) + hitDiceRecovered,
-        dhp: (result.dhp ?? 0) + hitPointsRecovered,
-        updateData: {
-          ...(hdActorUpdates ?? {}),
-          ...hpActorUpdates,
-          ...this._getRestResourceRecovery({
-            recoverShortRestResources: !longRest,
-            recoverLongRestResources: (longRest && !shorties) || (!longRest && shorties),
-          }),
-          ...this._getRestSpellRecovery({ recoverLong: (longRest && !shorties) || (!longRest && shorties) }),
-        },
-        updateItems: [
-          ...(hdItemUpdates ?? []),
-          ...(await this._getRestItemUsesRecovery({
-            recoverShortRestUses: (!longRest && !shorties) || (longRest && !shorties) || (!longRest && shorties),
-            recoverLongRestUses: (longRest && !shorties) || (!longRest && shorties),
-            recoverDailyUses: newDay,
-            rolls,
-          })),
-        ],
-        longRest,
-        newDay,
-      });
-      result.rolls = rolls;
+      if (
+        config.exhaustionDelta &&
+        !result.clone.hasConditionEffect("malnourished") &&
+        !result.clone.hasConditionEffect("dehydrated")
+      ) {
+        const path = "system.attributes.exhaustion";
+        const value = foundry.utils.getProperty(result.clone, path) ?? 0;
+        foundry.utils.mergeObject(result.updateData, { [path]: Math.max(0, value + config.exhaustionDelta) });
+      }
 
       /**
        * A hook event that fires after rest result is calculated, but before any updates are performed.
@@ -368,15 +324,40 @@ async function patch__rest() {
        */
       if (Hooks.call("dnd5e.preRestCompleted", this, result, config) === false) return result;
 
+      // Expire active effects
+      const expiryEvents = CONFIG.DND5E.restTypes[config.type ?? "long"]?.expiryEvents ?? [];
+      let operations = [];
+      if (expiryEvents.length) {
+        const expired = new Map();
+        const expireEffect = (effect) => {
+          if (expiryEvents.includes(effect.duration.expiry)) expired.getOrInsert(effect.parent, []).push(effect.id);
+        };
+        for (const effect of this.effects) {
+          if (!effect.getFlag("dnd5e", "dependentOn")) expireEffect(effect);
+        }
+        for (const item of this.items) {
+          for (const effect of item.effects) {
+            if (effect.getFlag("dnd5e", "dependentOn")) continue;
+            if (effect.isAppliedEnchantment) expireEffect(effect);
+          }
+        }
+        operations = expired
+          .entries()
+          .map(([parent, ids]) => ({ action: "delete", documentName: "ActiveEffect", ids, parent }))
+          .toArray();
+      }
+
       // Perform updates
-      await this.update(result.updateData, { isRest: true });
-      await this.updateEmbeddedDocuments("Item", result.updateItems, { isRest: true });
+      await this.performBulkUpdate(
+        { actor: result.updateData, delete: result.deleteItems, item: result.updateItems, operations },
+        { isRest: true },
+      );
 
       // Advance the game clock
       if (config.advanceTime && config.duration > 0 && game.user.isGM) await game.time.advance(60 * config.duration);
 
       // Display a Chat Message summarizing the rest effects
-      if (config.chat) await this._displayRestResultMessage(result, longRest);
+      if (config.chat) result.message = await this._displayRestResultMessage(config, result);
 
       /**
        * A hook event that fires when the rest process is completed for an actor.
@@ -388,8 +369,185 @@ async function patch__rest() {
        */
       Hooks.callAll("dnd5e.restCompleted", this, result, config);
 
+      if (
+        config.advanceBastionTurn &&
+        game.user.isGM &&
+        game.settings.get("dnd5e", "bastionConfiguration").enabled &&
+        this.itemTypes.facility.length
+      )
+        await dnd5e.bastion.advanceAllFacilities(this);
+
       // Return data summarizing the rest effects
       return result;
+    },
+    "OVERRIDE",
+  );
+}
+
+async function patch__getRestHitDiceRecovery() {
+  libWrapper.register(
+    MODULE_ID, // the package's "id" or your world's manifest "id"
+    "CONFIG.Actor.documentClass.prototype._getRestHitDiceRecovery",
+    async function ({ maxHitDice, fraction, ...config } = {}, result = {}) {
+      const restConfig = CONFIG.DND5E.restTypes[config.type];
+      if (!this.system.attributes.hd || !restConfig?.recoverHitDice) return;
+      fraction ??= dnd5e.settings.rulesVersion === "modern" ? 1 : 0.5;
+
+      // Handle simpler HD recovery for NPCs
+      if (this.system.isNPC) {
+        const hd = this.system.attributes.hd;
+        const recovered = Math.min(Math.max(1, Math.floor(hd.max * fraction)), hd.spent, maxHitDice ?? Infinity);
+        foundry.utils.mergeObject(result, {
+          deltas: {
+            hitDice: (result.deltas?.hitDice ?? 0) + recovered,
+          },
+          updateData: {
+            "system.attributes.hd.spent": hd.spent - recovered,
+          },
+        });
+        return;
+      }
+
+      // this.system.attributes.hd.createHitDiceUpdates({ maxHitDice, fraction, ...config }, result);
+      customCreateHitDiceUpdates.call(this.system.attributes.hd, this, { maxHitDice, fraction, ...config }, result);
+    },
+    "OVERRIDE",
+  );
+}
+
+async function customCreateHitDiceUpdates(
+  actor,
+  { maxHitDice, fraction = 0.5, largest = true, ...config } = {},
+  result = {},
+) {
+  if (!Number.isInteger(maxHitDice)) maxHitDice = Math.max(Math.floor(this.max * fraction), 1);
+
+  // Grab classes as values
+  let classes = Array.from(this.classes);
+
+  // Modify available classes for the special actors and set their maxHitDice differently
+  const findActor = ACTORS.find((obj) => obj.id == actor.id);
+  if (findActor != undefined) {
+    console.log(`------ MODIFYING HIT DIE RECOVERY (${actor.name}) -------`);
+
+    // Filter out to only recovery classes
+    classes = classes.filter((cla) => findActor.hitDiceRecoveryClasses.includes(cla.name));
+  }
+
+  classes.sort((lhs, rhs) => {
+    const sort = lhs.system.hd.denomination.localeCompare(rhs.system.hd.denomination, "en", { numeric: true });
+    return largest ? sort * -1 : sort;
+  });
+
+  const updateItems = [];
+  let recovered = 0;
+  for (const item of classes) {
+    const used = item.system.hd.spent;
+    if (recovered < maxHitDice && used > 0) {
+      const delta = Math.min(used, maxHitDice - recovered);
+      recovered += delta;
+      updateItems.push({ _id: item.id, "system.hd.spent": used - delta });
+    }
+  }
+  foundry.utils.mergeObject(result, {
+    deltas: {
+      hitDice: (result?.deltas?.hitDice ?? 0) + recovered,
+    },
+    updateItems,
+  });
+}
+
+async function patch__getRestResourceRecovery() {
+  libWrapper.register(
+    MODULE_ID, // the package's "id" or your world's manifest "id"
+    "CONFIG.Actor.documentClass.prototype._getRestResourceRecovery",
+    async function ({ recoverShortRestResources, recoverLongRestResources, ...config } = {}, result = {}) {
+      recoverShortRestResources ??= config.type === "short";
+      recoverLongRestResources ??= config.type === "long";
+
+      // Shorties: Class abilities, item charges, and spell slots do NOT on recover on a long rest, but on a short rest instead.
+      // Check for shorties (those who get back long rest resources on short rests instead)
+      const shorties = game.settings.get(MODULE_ID, "shorties").split(/\s+/);
+      const shorty = shorties.includes(this.id);
+      const longRest = result.type === "long";
+      if (shorty && longRest) recoverLongRestResources = false;
+      if (shorty && !longRest) recoverLongRestResources = true;
+
+      for (let [k, r] of Object.entries(this.system.resources ?? {})) {
+        if (Number.isNumeric(r.max) && ((recoverShortRestResources && r.sr) || (recoverLongRestResources && r.lr))) {
+          result.updateData[`system.resources.${k}.value`] = Number(r.max);
+        }
+      }
+    },
+    "OVERRIDE",
+  );
+}
+
+async function patch__getRestSpellRecovery() {
+  libWrapper.register(
+    MODULE_ID, // the package's "id" or your world's manifest "id"
+    "CONFIG.Actor.documentClass.prototype._getRestSpellRecovery",
+    async function ({ recoverShort, recoverLong, ...config } = {}, result = {}) {
+      const restConfig = CONFIG.DND5E.restTypes[config.type];
+
+      // Shorties: Class abilities, item charges, and spell slots do NOT on recover on a long rest, but on a short rest instead.
+      // Check for shorties (those who get back long rest resources on short rests instead)
+      const shorties = game.settings.get(MODULE_ID, "shorties").split(/\s+/);
+      const shorty = shorties.includes(this.id);
+      const longRest = result.type === "long";
+      if (shorty && longRest) restConfig.recoverSpellSlotTypes = new Set([]);
+      if (shorty && !longRest) restConfig.recoverSpellSlotTypes = new Set(["spell", "pact"]);
+
+      if (!this.system.spells) return;
+      const types = restConfig.recoverSpellSlotTypes;
+      if (!types?.size) return;
+      for (const [key, slot] of Object.entries(this.system.spells)) {
+        if (!types.has(slot.type)) continue;
+        result.updateData[`system.spells.${key}.value`] = slot.max;
+      }
+    },
+    "OVERRIDE",
+  );
+}
+
+async function patch__getRestItemUsesRecovery() {
+  libWrapper.register(
+    MODULE_ID, // the package's "id" or your world's manifest "id"
+    "CONFIG.Actor.documentClass.prototype._getRestItemUsesRecovery",
+    async function ({ recoverShortRestUses, recoverLongRestUses, recoverDailyUses, ...config } = {}, result = {}) {
+      const restConfig = CONFIG.DND5E.restTypes[config.type];
+
+      // Shorties: Class abilities, item charges, and spell slots do NOT on recover on a long rest, but on a short rest instead.
+      // Check for shorties (those who get back long rest resources on short rests instead)
+      const shorties = game.settings.get(MODULE_ID, "shorties").split(/\s+/);
+      const shorty = shorties.includes(this.id);
+      const longRest = result.type === "long";
+      if (shorty && longRest) restConfig.recoverPeriods = [];
+      if (shorty && !longRest) restConfig.recoverPeriods = ["lr", "sr"];
+
+      let recovery = Array.from(restConfig.recoverPeriods ?? []).map((p) => [p, 1]);
+      if (recoverShortRestUses) recovery.unshift(["sr", 1]);
+      if (recoverLongRestUses) recovery.unshift(["lr", 1]);
+      if ((recoverDailyUses || config.newDay) && dnd5e.settings.calendarConfig.manualRecovery) {
+        const days = dnd5e.settings.restVariant === "gritty" && config.type === "long" ? 7 : 1;
+        recovery.unshift(["day", days], ["dawn", days], ["dusk", days]);
+      }
+      recovery = new Map(recovery);
+
+      result.updateItems ??= [];
+      result.rolls ??= [];
+      for (const item of this.items) {
+        if (item.isHidden || foundry.utils.getType(item.system.recoverUses) !== "function") continue;
+        const { updates, rolls, destroy } = await item.system.recoverUses(recovery);
+        if (destroy) {
+          result.deleteItems.push(item.id);
+        } else if (!foundry.utils.isEmpty(updates)) {
+          const updateTarget = result.updateItems.find((i) => i._id === item.id);
+          if (updateTarget) foundry.utils.mergeObject(updateTarget, updates);
+          else result.updateItems.push({ _id: item.id, ...updates });
+        }
+        result.rolls.push(...rolls);
+      }
     },
     "OVERRIDE",
   );
