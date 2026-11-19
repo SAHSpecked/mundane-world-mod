@@ -7,7 +7,7 @@
       "name": "SAHSpecked"
     }
   ],
-  "version": "0.0.5",
+  "version": "0.0.6",
   "compatibility": {
     "minimum": "14",
     "verified": "14"
@@ -23,8 +23,8 @@
         "type": "system",
         "manifest": "https://github.com/foundryvtt/dnd5e/releases/download/latest/system.json",
         "compatibility": {
-          "minimum": "6.0.6",
-          "verified": "6.0.6"
+          "minimum": "6.1.0",
+          "verified": "6.1.0"
         }
       }
     ],

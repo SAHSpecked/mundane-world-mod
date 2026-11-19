@@ -42,7 +42,7 @@ const ACTORS = [
   },
   {
     name: "Misha",
-    id: "1haYgIQBNwRZ1IlQ",
+    id: "bmc2FceGXd5MwK6S",
     hitDiceRecoveryClasses: ["Warlock"],
     srExhaustionRecovery: false,
   },
@@ -225,28 +225,32 @@ Hooks.on("setup", () => {
 });
 
 // Magic tables automation
-Hooks.on("dnd5e.useItem", async (item, config, options) => {
+Hooks.on("dnd5e.postUseActivity", async (activity, usageConfig, results) => {
+  // Ignore the wrapper "cast" activity so it doesn't fire before the spell resolves
+  if (activity.type === "cast") return;
+
+  const item = activity.item;
+
+  // Now this only fires once when the actual spell activity executes
+  if (activity.item?.type !== "spell") return;
+
   // Roll current magic tables if enabled, on spellcast, and if actor is not an exception
   if (game.settings.get(MODULE_ID, "enableMagicTablesAHOA")) {
-    if (item.type == "spell") {
-      const exceptions = game.settings.get(MODULE_ID, "magicTablesExceptionsAHOA").split(/\s+/);
-      if (!exceptions.includes(item.actor.id)) {
-        const tables = game.settings.get(MODULE_ID, "magicTablesIdsAHOA").split(/\s+/);
-        for (const tableId of tables) {
-          await game.tables.get(tableId).draw();
-        }
+    const exceptions = game.settings.get(MODULE_ID, "magicTablesExceptionsAHOA").split(/\s+/);
+    if (!exceptions.includes(item.actor.id)) {
+      const tables = game.settings.get(MODULE_ID, "magicTablesIdsAHOA").split(/\s+/);
+      for (const tableId of tables) {
+        await game.tables.get(tableId).draw();
       }
     }
   }
 
   if (game.settings.get(MODULE_ID, "enableMagicTablesTFA")) {
-    if (item.type == "spell") {
-      const exceptions = game.settings.get(MODULE_ID, "magicTablesExceptionsTFA").split(/\s+/);
-      if (!exceptions.includes(item.actor.id)) {
-        const tables = game.settings.get(MODULE_ID, "magicTablesIdsTFA").split(/\s+/);
-        for (const tableId of tables) {
-          await game.tables.get(tableId).draw();
-        }
+    const exceptions = game.settings.get(MODULE_ID, "magicTablesExceptionsTFA").split(/\s+/);
+    if (!exceptions.includes(item.actor.id)) {
+      const tables = game.settings.get(MODULE_ID, "magicTablesIdsTFA").split(/\s+/);
+      for (const tableId of tables) {
+        await game.tables.get(tableId).draw();
       }
     }
   }
