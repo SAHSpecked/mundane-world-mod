@@ -42,7 +42,7 @@ const ACTORS = [
   },
   {
     name: "Misha",
-    id: "bmc2FceGXd5MwK6S",
+    id: "4alxRJz42yN1OKML",
     hitDiceRecoveryClasses: ["Warlock"],
     srExhaustionRecovery: false,
   },
